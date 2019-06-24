@@ -39,26 +39,32 @@ AppAsset::register($this);
   ]);
   $menuItems = [];
   if (!Yii::$app->user->isGuest) {
-    $menuItems[] = ['label' => 'Home', 'url' => ['/site/index']];
-    $menuItems[] = ['label' => 'Active', 'url' => ['/task/active']];
-    $menuItems[] = ['label' => 'Create', 'url' => ['/task/create']];
+    $menuItems[] = ['label' => Yii::t('app','home'), 'url' => ['/site/index']];
+    $menuItems[] = ['label' => Yii::t('app','active'), 'url' => ['/task/active']];
+    $menuItems[] = ['label' => Yii::t('app','create_task'), 'url' => ['/task/create']];
   }
 
-  $menuItems[] = ['label' => 'About', 'url' => ['/site/about']];
+  $menuItems[] = ['label' => Yii::t('app','about'), 'url' => ['/site/about']];
 
   if (Yii::$app->user->isGuest) {
-    $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
-    $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+    $menuItems[] = ['label' => Yii::t('app','signup'), 'url' => ['/site/signup']];
+    $menuItems[] = ['label' => Yii::t('app','login'), 'url' => ['/site/login']];
   } else {
     $menuItems[] = '<li>'
       . Html::beginForm(['/site/logout'], 'post')
       . Html::submitButton(
-        'Logout (' . Yii::$app->user->identity->username . ')',
+        Yii::t('app','logout').' (' . Yii::$app->user->identity->username . ')',
         ['class' => 'btn btn-link logout']
       )
       . Html::endForm()
       . '</li>';
   }
+
+  $menuItems[] = ['label' => Yii::t('app','language'), 'items' => [
+    ['label' => 'Русский', 'url' => ['site/lang', 'lang' => 'ru']],
+    ['label' => 'English', 'url' => ['site/lang', 'lang' => 'en']],
+  ]];
+
   echo Nav::widget([
     'options' => ['class' => 'navbar-nav navbar-right'],
     'items' => $menuItems,
