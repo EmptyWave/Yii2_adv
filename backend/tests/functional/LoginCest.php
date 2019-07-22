@@ -3,6 +3,7 @@
 namespace backend\tests\functional;
 
 use backend\tests\FunctionalTester;
+use Codeception\Example;
 use common\fixtures\UserFixture;
 
 /**
@@ -26,6 +27,28 @@ class LoginCest
             ]
         ];
     }
+
+    /**
+     * @dataProvider pageProvider
+     */
+    public function testPageH1(FunctionalTester $I, Example $data){
+        $I->amLoggedInAs(1);
+
+        $I->amOnPage($data['url']);
+
+        $I->see($data['h1'], 'h1');
+    }
+
+    /**
+     * @return array
+     */
+    protected function pageProvider() // alternatively, if you want the function to be public, be sure to prefix it with `_`
+    {
+        return [
+            ['url'=>"site/profile", 'h1'=>"erau"],
+            ['url'=>"/", 'h1'=>"My Yii Application"],
+        ];
+    }
     
     /**
      * @param FunctionalTester $I
@@ -33,10 +56,11 @@ class LoginCest
     public function loginUser(FunctionalTester $I)
     {
         $I->amOnPage('/site/login');
-        $I->fillField(['id'=>"loginform-username"], 'erau');
-        $I->fillField(['id'=>"loginform-password"], 'password_0');
+        $I->fillField(['name' => 'LoginForm[username]'], 'erau');
+        $I->fillField(['id' => 'loginform-password'], 'password_0');
         $I->click('login-button');
 
+//        $I->see('Logout (erau)', 'form button[type=submit]');
         $I->seeLink('Sign out');
         $I->dontSeeLink('Login');
         $I->dontSeeLink('Signup');
