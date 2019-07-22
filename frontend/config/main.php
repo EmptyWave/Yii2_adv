@@ -1,92 +1,91 @@
 <?php
 $params = array_merge(
-  require __DIR__ . '/../../common/config/params.php',
-  require __DIR__ . '/../../common/config/params-local.php',
-  require __DIR__ . '/params.php',
-  require __DIR__ . '/params-local.php'
+    require __DIR__ . '/../../common/config/params.php',
+    require __DIR__ . '/../../common/config/params-local.php',
+    require __DIR__ . '/params.php',
+    require __DIR__ . '/params-local.php'
 );
 
 return [
-  'id' => 'app-frontend',
-  'basePath' => dirname(__DIR__),
-  'bootstrap' => ['log', 'bootstrap'],
-  'controllerNamespace' => 'frontend\controllers',
-  'components' => [
+    'language' => 'en',
+    'id' => 'app-frontend',
+    'basePath' => dirname(__DIR__),
     'bootstrap' => [
-      'class' => \app\components\Bootstrap::class
+        'log',
+        'bootstrap'],
+    'aliases' => [
+        '@bower' => '@vendor/bower-asset',
+        '@npm' => '@vendor/npm-asset',
+        '@img' => '@frontend/web/img/',
     ],
-    'authManager' => [
-      'class' => \yii\rbac\DbManager::class,
-    ],
-    'request' => [
-      'csrfParam' => '_csrf-frontend',
-    ],
-    /*'user' => [
-      'identityClass' => 'common\models\User',
-      'enableAutoLogin' => true,
-      'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
-    ],*/
-    'user' => [
-      'identityClass' => 'common\models\User',
-      'loginUrl' => ['/site/login'],
-    ],
-    'session' => [
-      // this is the name of the session cookie used for login on the frontend
-      'name' => 'advanced-frontend',
-    ],
-    'log' => [
-      'traceLevel' => YII_DEBUG ? 3 : 0,
-      'targets' => [
-        [
-          'class' => 'yii\log\FileTarget',
-          'levels' => ['error', 'warning'],
+    'controllerNamespace' => 'frontend\controllers',
+    'components' => [
+        'i18n' => [
+            'translations' => [
+                'app*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => "@app/messages"
+                ],
+                'view*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => "@app/messages"
+                ],
+            ]
         ],
-      ],
-    ],
-    'errorHandler' => [
-      'errorAction' => 'site/error',
-    ],
-
-    'urlManager' => [
-      'enablePrettyUrl' => true,
-      'showScriptName' => false,
-      'rules' => [
-      ],
-    ],
-
-  ],
-  'params' => $params,
-  'modules' => [
-    'admin' => [
-      'class' => 'mdm\admin\Module',
-      'layout' => 'left-menu',
-      'mainLayout' => '@app/views/layouts/main.php',
-      'controllerMap' => [
-        'assignment' => [
-          'class' => 'mdm\admin\controllers\AssignmentController',
-          'userClassName' => 'common\models\User',
-          'idField' => 'user_id',
-          //'searchClass' => 'app\models\filters\UsersFilter'
+        'bootstrap' => [
+            'class' => \frontend\components\Bootstrap::class
         ],
-        /*'other' => [
-          'class' => 'path\to\OtherController', // add another controller
-        ],*/
-      ],
-      'menus' => [
-        'assignment' => [
-          'label' => 'Grand Access'
+//        'cache' => [
+////            'class' => 'yii\caching\FileCache',
+//            'class' => 'yii\redis\Cache',
+//        ],
+//        'redis' => [
+//            'class' => 'yii\redis\Connection',
+//            'hostname' => 'localhost',
+//            'port' => 6379,
+//            'database' => 0,
+//        ],
+        'request' => [
+            'csrfParam' => '_csrf-frontend',
+//            'cookieValidationKey' => 'o70eH_h6H29D73PeQSNLuFbtUQZ9TzWi', из yii2-base
         ],
-        'route' => null, // disable menu route
-      ]
-    ],
-  ],
+        'user' => [
+//            'identityClass' => \app\models\UserIdentity::class, из yii2 base
+            'identityClass' => 'common\models\User',
+            'enableAutoLogin' => true,
+            'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
+        ],
+        'session' => [
+            // this is the name of the session cookie used for login on the frontend
+            'name' => 'advanced-frontend',
+        ],
+        'log' => [
+            'traceLevel' => YII_DEBUG ? 3 : 0,
+            'targets' => [
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['error', 'warning'],
+                ],
+            ],
+        ],
+        'errorHandler' => [
+            'errorAction' => 'site/error',
+        ],
+        //URL-менеджер, вместо site?r=controller/action/... используется: site/controller/action/id...
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+                'task/<page>/<per-page>' => 'task/index',
+                'tasks' => 'task/index',
+//                'task/<id>' => 'task/one',
+                'GET task/<id>' => 'task/one',
+                'GET/POST admin-task/update-<id>' => 'admin-task/update',
+                'GET admin-task/view-<id>' => 'admin-task/view',
+//                'POST task/<id>' => 'task/two'
+            ],
+        ],
 
-  'as access' => [
-    'class' => 'mdm\admin\components\AccessControl',
-    'allowActions' => [
-      'site/*',
-      'admin/*',
-      'task/*',
-    ]
-  ],
+    ],
+    'params' => $params,
 ];
