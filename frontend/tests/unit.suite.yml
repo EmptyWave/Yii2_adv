@@ -5,3 +5,9 @@ modules:
         - Yii2:
             part: [orm, email, fixtures]
         - Asserts
+coverage:
+    enabled: true
+    whitelist:
+        include:
+            - models/*
+            - controllers/*

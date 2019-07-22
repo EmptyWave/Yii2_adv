@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use frontend\components\TaskComponent;
 use frontend\models\tables\TaskStatuses;
 use frontend\models\tables\Users;
 use Yii;
@@ -85,8 +86,16 @@ class AdminTaskController extends Controller
     {
         $model = new Task();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        /**@var TaskComponent $task */
+        $task=Yii::$app->task;
+//        $task=Yii::createObject(['class' => TaskComponent::class]);
+
+        if ($model->load(Yii::$app->request->post())
+            &&
+//            $model->save()) { -неправильный подход
+            $task->create($model)) {
             return $this->redirect(['view', 'id' => $model->id]);
+//            return $this->redirect([\yii\helpers\Url::to(['/task/index'])]);
         }
 
         $usersList = Users::getUsersList();

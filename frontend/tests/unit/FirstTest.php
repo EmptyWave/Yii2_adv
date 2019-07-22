@@ -23,7 +23,7 @@ class FirstTest extends \Codeception\Test\Unit
         $model = new SignupForm();
         $model->username = 'qwerty';
         $model->email = 'email@email.ru';
-//        $model->password = 'sdfsdf';
+        $model->password = 'sdfsdf';
 
         $this->tester->assertEquals($model->username, 'qwerty', 'Проверка имени пользователя');
         expect('Проверка валидности', $model->validate())->true();

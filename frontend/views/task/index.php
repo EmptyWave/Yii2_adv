@@ -29,6 +29,9 @@ echo $dataProvider->sort->link('update_time');
     </div>
 <?php ActiveForm::end(); ?>
 
+<?=Html::a('Create Task',[\yii\helpers\Url::to(['/admin-task/create'])],
+    ['class' => 'btn', 'style' => 'background-color: green; color: white'])?>
+
 <?php
 //Пример кэширование вьюхи:
 //$request = Yii::$app->request;

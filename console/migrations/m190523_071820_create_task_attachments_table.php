@@ -23,8 +23,8 @@ class m190523_071820_create_task_attachments_table extends Migration
             'user_id' => $this->integer(),
         ]);
 
-        $taskTable = \app\models\tables\Task::tableName();
-        $userTable = \app\models\tables\Users::tableName();
+        $taskTable = 'task';
+        $userTable = 'users';
 
         $this->addForeignKey('fk_comments_tasks',$this->commentsTable, 'task_id', $taskTable, 'id');
         $this->addForeignKey('fk_comments_users',$this->commentsTable, 'user_id', $userTable, 'id');

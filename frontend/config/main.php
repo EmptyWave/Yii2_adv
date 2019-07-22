@@ -19,6 +19,11 @@ return [
         '@img' => '@frontend/web/img/',
     ],
     'controllerNamespace' => 'frontend\controllers',
+    'modules' => [
+        'api' => [
+            'class' => 'frontend\modules\api\Module',
+        ],
+    ],
     'components' => [
         'i18n' => [
             'translations' => [
@@ -35,6 +40,9 @@ return [
         'bootstrap' => [
             'class' => \frontend\components\Bootstrap::class
         ],
+        'task' => [
+            'class' => \frontend\components\TaskComponent::class
+        ],
 //        'cache' => [
 ////            'class' => 'yii\caching\FileCache',
 //            'class' => 'yii\redis\Cache',
@@ -47,12 +55,17 @@ return [
 //        ],
         'request' => [
             'csrfParam' => '_csrf-frontend',
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser'
+            ],
 //            'cookieValidationKey' => 'o70eH_h6H29D73PeQSNLuFbtUQZ9TzWi', из yii2-base
         ],
         'user' => [
 //            'identityClass' => \app\models\UserIdentity::class, из yii2 base
             'identityClass' => 'common\models\User',
-            'enableAutoLogin' => true,
+//            'enableAutoLogin' => true,
+            'enableAutoLogin' => false,
+            'enableSession' => true,
             'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
         ],
         'session' => [
@@ -76,13 +89,17 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                'task/<page>/<per-page>' => 'task/index',
-                'tasks' => 'task/index',
-//                'task/<id>' => 'task/one',
-                'GET task/<id>' => 'task/one',
-                'GET/POST admin-task/update-<id>' => 'admin-task/update',
-                'GET admin-task/view-<id>' => 'admin-task/view',
-//                'POST task/<id>' => 'task/two'
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/user',
+                    'pluralize' => false],
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/task',
+                    'pluralize' => false],
+//                'task/<page>/<per-page>' => 'task/index',
+//                'tasks' => 'task/index',
+////                'task/<id>' => 'task/one',
+//                'GET task/<id>' => 'task/one',
+//                'GET/POST admin-task/update-<id>' => 'admin-task/update',
+//                'GET admin-task/view-<id>' => 'admin-task/view',
+////                'POST task/<id>' => 'task/two'
             ],
         ],
 

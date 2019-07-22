@@ -27,7 +27,15 @@ use \frontend\models\tables\Users;
 <!--    Выпадающий список пользователей-->
     <?= $form->field($model, 'responsible_id')->dropDownList($usersList); ?>
 
-    <?= $form->field($model, 'deadline')->textInput(['type'=>'date']) ?>
+<!--    <?//= $form->field($model, 'deadline')->textInput(['type'=>'date']) ?>-->
+
+    <?= $form->field($model, 'deadline')->widget(\yii\jui\DatePicker::class,
+        ['dateFormat' => 'yyyy-MM-dd',
+            'options' => [
+                'class' => 'form-control',
+                'placeholder' => 'Дата в формате yyyy-MM-dd',
+                'autocomplete' => 'off',
+            ]]) ?>
 
     <?= $form->field($model, 'status_id')->dropDownList($statusesList) ?>
 

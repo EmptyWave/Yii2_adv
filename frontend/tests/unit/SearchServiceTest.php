@@ -36,6 +36,6 @@ class SearchServiceTest extends \Codeception\Test\Unit
 
         expect($secondName)->notNull();
 
-        expect($secondName)->equals('Zatonski');
+        expect($secondName)->equals('ZATONSKI');
     }
 }

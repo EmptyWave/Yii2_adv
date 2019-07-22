@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use frontend\controllers\actions\LangAction;
 use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
 use Yii;
@@ -76,6 +77,7 @@ class SiteController extends Controller
                 'class' => 'yii\captcha\CaptchaAction',
                 'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
             ],
+            'lang' => ['class' => LangAction::class]
         ];
     }
 
@@ -86,7 +88,8 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+//        return $this->render('index');
+        return $this->redirect([\yii\helpers\Url::to(['/task/index'])]);
     }
 
     /**
@@ -269,9 +272,11 @@ class SiteController extends Controller
             'model' => $model
         ]);
     }
-    public function actionLang($lang)
-    {
-        Yii::$app->session->set('lang', $lang);
-        $this->redirect(Yii::$app->request->referrer);
-    }
+
+    //Перенес в автоматический action
+//    public function actionLang($lang)
+//    {
+//        Yii::$app->session->set('lang', $lang);
+//        $this->redirect(Yii::$app->request->referrer);
+//    }
 }

@@ -14,52 +14,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property Task[] $tasks
  */
-class TaskStatuses extends \yii\db\ActiveRecord
+class TaskStatuses extends \common\models\tables\TaskStatuses
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'task_statuses';
-    }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['name'], 'string', 'max' => 50],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'name' => 'Name',
-        ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTasks()
-    {
-        return $this->hasMany(Task::className(), ['status_id' => 'id']);
-    }
-
-    public static function getList()
-    {
-        return ArrayHelper::map(
-            static::find()
-            ->select(['id', 'name'])
-            ->asArray()
-            ->indexBy('id')
-            ->all(), 'id', 'name');
-    }
 }

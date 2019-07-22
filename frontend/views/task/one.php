@@ -38,7 +38,9 @@ use yii\helpers\Html;
                     ->widget(\yii\jui\DatePicker::class,
                         ['dateFormat' => 'yyyy-MM-dd',
                             'options' => [
-                                'class' => 'form-control'
+                                'class' => 'form-control',
+                                'placeholder' => 'Дата в формате yyyy-MM-dd',
+                                'autocomplete' => 'off',
                             ]]);
                 ?>
             </div>

@@ -12,7 +12,34 @@ return [
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
     'modules' => [],
+    'container'=>[
+        'singletons'=>[
+            \backend\components\TaskService::class=>[
+                'class'=>\backend\components\Task::class
+            ],
+            'db'=>function(){
+                return Yii::$app->db;
+            },
+            \backend\share\RepositoryTask::class=>[
+                ['class'=>\backend\components\TaskRepositoryMysql::class],
+                [\yii\di\Instance::of('db')]
+            ]
+        ],
+        'definitions'=>[
+            'user'=>['class'=>\common\models\User::class],
+            \yii\web\IdentityInterface::class=>[
+                'class'=>'user'
+            ]
+        ]
+    ],
     'components' => [
+        'view' => [
+            'theme' => [
+                'pathMap' => [
+                    '@app/views' => '@vendor/dmstr/yii2-adminlte-asset/example-views/yiisoft/yii2-app'
+                ],
+            ],
+        ],
         'request' => [
             'csrfParam' => '_csrf-backend',
         ],
@@ -37,14 +64,12 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        /*
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
             ],
         ],
-        */
     ],
     'params' => $params,
 ];

@@ -8,6 +8,7 @@
 
 namespace frontend\validators;
 
+use frontend\models\tables\TaskStatuses;
 use yii\validators\Validator;
 
 class StatusValidate extends Validator
@@ -19,7 +20,7 @@ class StatusValidate extends Validator
 //        $status = $this->status;
 
         $value = $model->$attribute;
-        if(!in_array($value, ['В работе', 'Закрыта'])){
+        if(!in_array($value, array_keys(\common\models\TaskStatuses::STATUSES))){
             $this->addError($model, $attribute, 'Неверный статус');
 
 //            return;

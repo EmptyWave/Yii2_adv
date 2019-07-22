@@ -18,6 +18,7 @@ class SearchService implements Search
     public function find($name)/*:?string*/ {
 
         $s = $this->repository->find($name);
+
         return mb_strtoupper($s, 'utf-8');
     }
 }
