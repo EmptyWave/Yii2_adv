@@ -2,11 +2,9 @@
 
 namespace frontend\models\filters;
 
-use Yii;
 use yii\base\Model;
-use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
-use common\models\Task;
+use frontend\models\tables\Task;
 
 /**
  * TasksFilter represents the model behind the search form of `app\models\tables\Task`.
@@ -20,8 +18,7 @@ class TasksFilter extends Task
     {
         return [
             [['id', 'creator_id', 'responsible_id', 'status_id'], 'integer'],
-            [['name', 'description', 'deadline', 'modified'], 'safe'],
-            [['created',], 'default', 'value' => null]
+            [['name', 'description', 'deadline'], 'safe'],
         ];
     }
 
@@ -49,11 +46,12 @@ class TasksFilter extends Task
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [ //пагинация
+                'pageSize' => 8,
+            ],
         ]);
 
         $this->load($params);
-
-        if ($this->created == 0) unset($this->created);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -63,28 +61,15 @@ class TasksFilter extends Task
 
         // grid filtering conditions
         $query->andFilterWhere([
-            //'id' => $this->id,
-            //'creator_id' => $this->creator_id,
+            'id' => $this->id,
+            'creator_id' => $this->creator_id,
             'responsible_id' => $this->responsible_id,
-            //'deadline' => $this->deadline,
-            //'status_id' => $this->status_id,
-            'created' => $this->created,
-            //'modified' => $this->modified,
+            'deadline' => $this->deadline,
+            'status_id' => $this->status_id,
         ]);
 
-        if ($this->created)
-            $query->orFilterWhere(['REGEXP', 'created', $this->created]);
-
-        $query->andFilterWhere(['like', 'responsible_id', $this->responsible_id]);
-        $dependency = new DbDependency();
-        $dependency->sql = 'SELECT MAX(modified) FROM task';
-
-        Yii::$app->db->cache(function () use ($dataProvider) {
-
-            $dataProvider->prepare();
-
-        }, 300, $dependency);
-
+        $query->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'description', $this->description]);
 
         return $dataProvider;
     }
