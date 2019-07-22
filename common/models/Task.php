@@ -2,142 +2,58 @@
 
 namespace common\models;
 
-use Yii;
-use yii\behaviors\TimestampBehavior;
-use yii\db\Expression;
+use frontend\validators\StatusValidate;
+use yii\base\Model;
 
-/**
- * This is the model class for table "task".
- *
- * @property int $id
- * @property string $name
- * @property string $description
- * @property int $creator_id
- * @property int $responsible_id
- * @property string $deadline
- * @property int $status_id
- * @property string $created
- * @property string $modified
- *
- * @property TaskStatuses $status
- * @property TaskAttachments[] $taskAttachments
- * @property TaskComments[] $taskComments
- */
-class Task extends \yii\db\ActiveRecord
+class Task extends Model
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'task';
-    }
+    public $title;
+    public $description;
+    public $author;
+    public $responsible;
+    public $status;
 
-    /**
-     * {@inheritdoc}
-     */
     public function rules()
     {
         return [
-            [['name', 'description'], 'required'],
-            [['description'], 'string'],
-            [['creator_id', 'responsible_id', 'status_id'], 'integer'],
-            [['deadline', 'created', 'modified'], 'safe'],
-            [['name'], 'string', 'max' => 50],
-            [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => TaskStatuses::className(), 'targetAttribute' => ['status_id' => 'id']],
+            [['title', 'description'], 'required'],
+            [['title'], 'string', 'max' => 10],
+            [['status'], StatusValidate::class],
+            [['author', 'responsible'], 'safe']
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
+    public function statusValidate($attribute, $params)
+    {
+        if(!in_array($this->$attribute, ['В работе', 'Закрыта'])){
+            $this->addError($attribute, 'Неверный статус');
+        }
+    }
+
+
+    public function fields()
     {
         return [
-            'id' => 'ID',
-            'name' => 'Name',
-            'description' => 'Description',
-            'creator_id' => 'Creator ID',
-            'responsible_id' => 'Responsible ID',
-            'deadline' => 'Deadline',
-            'status_id' => 'Status ID',
-            'created' => 'Created',
-            'modified' => 'Modified',
+            'header' => 'title',
+            'description'
         ];
     }
 
-  public function getStatus()
-  {
-    return $this->hasOne(TaskStatuses::class, ['id' => 'status_id']);
-  }
-
-  public function getCreator()
-  {
-    return $this->hasOne(User::class, ['id' => 'creator_id']);
-  }
-
-  public function getResponsible()
-  {
-    return $this->hasOne(User::class, ['id' => 'responsible_id']);
-  }
-
-  public function getCreatedDate()
-  {
-    return  date('d-m-Y', strtotime($this->created));
-  }
-
-  public function getModifiedDate()
-  {
-    return  date('d-m-Y', strtotime($this->modified));
-  }
-
-  public function getTaskAttachments()
-  {
-    return $this->hasMany(TaskAttachments::class,['task_id' => 'id']);
-  }
-  public function getTaskComments()
-  {
-    return $this->hasMany(TaskComments::class,['task_id' => 'id']);
-  }
-
-  public static function getCreateMonthList()
-  {
-    $monthList = static::find()
-      ->select(['created'])
-      ->indexBy('created')
-      ->orderBy('created')
-      ->column();
-
-    $newMonthList = [];
-    foreach ($monthList as $key => $date) {
-      $monthNum = date('m', strtotime($date));
-      $yearNum = date('Y', strtotime($date));
-      $monthName = date('F', mktime(0, 0, 0, $monthNum, 10));
-      $newDate = $monthName . ' ' . $yearNum;
-      if (!in_array($newDate, $newMonthList)) {
-        $newKey = $yearNum . '-' . $monthNum . '[\d\W]*';
-        $newMonthList[$newKey] = $newDate;
-      }
+    public static function getMonths(){
+        return [
+            'all' => 'Все месяцы',
+            1 => 'Январь',
+            2 => 'Февраль',
+            3 => 'Март',
+            4 => 'Апрель',
+            5 => 'Май',
+            6 => 'Июнь',
+            7 => 'Июль',
+            8 => 'Август',
+            9 => 'Сентябрь',
+            10 => 'Октябрь',
+            11 => 'Ноябрь',
+            12 => 'Декабрь',
+        ];
     }
-    return $newMonthList;
-  }
-
-  public function behaviors()
-  {
-    return [
-      [
-        'class' => TimestampBehavior::className(),
-        'createdAtAttribute' => 'created',
-        'updatedAtAttribute' => 'modified',
-        'value' => new Expression('CURRENT_TIMESTAMP'),
-      ],
-    ];
-  }
-
-  public static function getTaskDeadline24(){
-    return static::find()
-      ->where('DATEDIFF(NOW(), task.deadline)<=1')
-      ->andWhere('DATEDIFF(NOW(), task.deadline)>=0')
-      ->all();
-  }
 }

@@ -1,61 +1,47 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: dimon
- * Date: 24.05.2019
- * Time: 19:11
- */
-
-namespace app\components;
 
 
-use common\models\Task;
+namespace frontend\components;
+
+
+use frontend\models\tables\Task;
+use yii\base\Application;
 use yii\base\BootstrapInterface;
 use yii\base\Component;
 use yii\base\Event;
-use yii\helpers\Url;
+use yii\behaviors\TimestampBehavior;
+use yii\db\Expression;
 
 class Bootstrap extends Component implements BootstrapInterface
 {
-  public function bootstrap($app){
-    $this->setSiteLanguage();
-    $this->attachEventsHandlers();
-  }
-
-  private function setSiteLanguage(){
-    if ($lang = \Yii::$app->session->get('lang')){
-      \Yii::$app->language = $lang;
+    public function bootstrap($app)
+    {
+        $this->setLanguageSettings();
+        $this->attachEventsHandlers();
     }
-  }
 
-  private function attachEventsHandlers(){
-    Event::on(Task::class, Task::EVENT_AFTER_INSERT, function ($event) {
-      $task = $event->sender;
-      $user = $task->responsible;
+    private function setLanguageSettings(){
+        if($lang = \Yii::$app->session->get('lang')){
+            \Yii::$app->language = $lang;
+        }
+    }
 
-      $body = "Назначена новая задача ($task->name).
-        Ссылка на задачу - " . Url::toRoute(['task/view', 'id' => $task->id], true);
+    private function attachEventsHandlers()
+    {
+        Event::on(Task::class, Task::EVENT_AFTER_INSERT, function ($event) {
+            /** @var Task $task */
+            $task = $event->sender;
+            $user = $task->responsible;
 
-      \Yii::$app->mailer->compose()
-        ->setTo($user->email)
-        ->setFrom('admin@gmail.com')
-        ->setSubject("Новая задача - " . $task->name)
-        ->setTextBody($body)
-        ->send();
-    });
+            $body = "New task {$task->name}.
+            link: http://yii2.uni.local/task/one?id={$task->id}";
 
-    Event::on(Task::class, Task::EVENT_BEFORE_DELETE, function ($event) {
-      $task = $event->sender;
-      $user = $task->responsible;
-
-      $body = "Задача - $task->name, отменена.";
-
-      \Yii::$app->mailer->compose()
-        ->setTo($user->email)
-        ->setFrom('admin@gmail.com')
-        ->setSubject("Задача отменена - " . $task->name)
-        ->setTextBody($body)
-        ->send();
-    });
-  }
+            \Yii::$app->mailer->compose()
+                ->setTo($user->email)
+                ->setFrom('admin@teest.ru')
+                ->setSubject('New task')
+                ->setTextBody($body)
+                ->send();
+        });
+    }
 }
