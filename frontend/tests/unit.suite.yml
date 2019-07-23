@@ -6,8 +6,8 @@ modules:
             part: [orm, email, fixtures]
         - Asserts
 coverage:
-    enable: true
+    enabled: true
     whitelist:
         include:
-            -models/*
-            -controllers/*
+            - models/*
+            - controllers/*

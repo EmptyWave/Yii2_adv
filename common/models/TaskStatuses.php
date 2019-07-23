@@ -1,61 +1,20 @@
 <?php
 
+
 namespace common\models;
 
-use Yii;
 
-/**
- * This is the model class for table "task_statuses".
- *
- * @property int $id
- * @property string $title
- * @property string $description
- *
- * @property Task[] $tasks
- */
-class TaskStatuses extends \yii\db\ActiveRecord
+use phpDocumentor\Reflection\Types\Self_;
+
+class TaskStatuses
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'task_statuses';
-    }
+    public const STATUS_CREATED=0;
+    public const STATUS_INWORK=1;
+    public const STATUS_COMPLETED=2;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['title', 'description'], 'required'],
-            [['title', 'description'], 'string', 'max' => 255],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'title' => 'Title',
-            'description' => 'Description',
-        ];
-    }
-
-  public function getTasks()
-  {
-    return $this->hasMany(Task::className(), ['status_id' => 'id']);
-  }
-
-  public static function getStatusList()
-  {
-    return static::find()
-      ->select(['title'])
-      ->indexBy('id')
-      ->column();
-  }
+    public const STATUSES=[
+        self::STATUS_CREATED=>'Создан',
+        self::STATUS_INWORK=>'В работе',
+        self::STATUS_COMPLETED=>'Звершен'
+    ];
 }
