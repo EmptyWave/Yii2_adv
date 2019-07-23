@@ -3,7 +3,7 @@ namespace frontend\tests\functional;
 
 use frontend\tests\FunctionalTester;
 
-class AboutCest
+class  AboutCest
 {
     public function checkAbout(FunctionalTester $I)
     {
