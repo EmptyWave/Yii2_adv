@@ -13,7 +13,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="site-signup">
   <div class="col-lg-offset-4 col-lg-8">
     <h1><?= Html::encode($this->title) ?></h1>
-    <p>Please fill out the following fields to Registration:</p>
+    <p>Please fill out the following fields to signup:</p>
   </div>
 
   <?php $form = ActiveForm::begin([

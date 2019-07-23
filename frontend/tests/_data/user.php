@@ -9,6 +9,7 @@ return [
         'created_at' => '1391885313',
         'updated_at' => '1391885313',
         'email' => 'brady.renner@rutherford.com',
+        'phone' => '12345678901',
     ],
     [
         'username' => 'troy.becker',
@@ -18,14 +19,15 @@ return [
         'created_at' => '1391885313',
         'updated_at' => '1391885313',
         'email' => 'nicolas.dianna@hotmail.com',
+        'phone' => '89998889988',
         'status' => '0',
     ],
     [
         'username' => 'test.test',
         'auth_key' => 'O87GkY3_UfmMHYkyezZ7QLfmkKNsllzT',
-        //Test1234
         'password_hash' => '$2y$13$d17z0w/wKC4LFwtzBcmx6up4jErQuandJqhzKGKczfWuiEhLBtQBK',
         'email' => 'test@mail.com',
+        'phone' => 'test.test',
         'status' => '9',
         'created_at' => '1548675330',
         'updated_at' => '1548675330',
@@ -37,6 +39,7 @@ return [
         //Test1234
         'password_hash' => '$2y$13$d17z0w/wKC4LFwtzBcmx6up4jErQuandJqhzKGKczfWuiEhLBtQBK',
         'email' => 'test2@mail.com',
+        'phone' => '1',
         'status' => '10',
         'created_at' => '1548675330',
         'updated_at' => '1548675330',
