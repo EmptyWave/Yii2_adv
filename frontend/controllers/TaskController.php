@@ -2,186 +2,141 @@
 
 namespace frontend\controllers;
 
-
-use frontend\models\AddAttachmentsForm;
-use common\models\TaskComments;
-use common\models\TaskStatuses;
-use common\models\Task;
-use common\models\User;
-use yii\caching\DbDependency;
-use yii\filters\AccessControl;
-use yii\filters\VerbFilter;
-use yii\data\ActiveDataProvider;
-use yii\web\Controller;
-use yii\web\UploadedFile;
-use yii\web\Response;
+use frontend\models\filters\TasksFilter;
+use frontend\models\forms\TaskAttachmentsAddForm;
+use frontend\models\tables\TaskComments;
+use frontend\models\tables\TaskStatuses;
+use frontend\models\tables\Users;
+use frontend\models\tables\Task;
 use Yii;
-
+use yii\caching\DbDependency;
+use yii\data\ActiveDataProvider;
+use yii\data\Sort;
+use yii\filters\AccessControl;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 
 class TaskController extends Controller
 {
-  public function behaviors()
-  {
-    return [
-      'access' => [
-        'class' => AccessControl::class,
-        'rules' => [
-          [
-            //'actions' => ['view'],
-            'allow' => true,
-            'roles' => ['@'],
-          ],
-        ],
-      ],
-      'verbs' => [
-        'class' => VerbFilter::class,
-        'actions' => [
-          'logout' => ['post'],
-        ],
-      ],
-    ];
-  }
+    //public $layout = false;
 
-  public function actions()
-  {
-    return [
-      'error' => [
-        'class' => 'yii\web\ErrorAction',
-      ],
-    ];
-  }
-
-  public function actionIndex()
-  {
-
-    return $this->render('index');
-
-  }
-
-  public function actionView()
-  {
-    $get = Yii::$app->request->get('id');
-
-    if ($get) {
-
-      $cache = Yii::$app->cache;
-      $key = 'Task_' . $get;
-
-      if (!$model = $cache->get($key)) {
-        $dependency = new DbDependency();
-        $dependency->sql = 'SELECT MAX(modified) FROM `task`';
-
-        $model = $this->findModel($get);
-        $cache->set($key, $model, 300, $dependency);
-      }
-
-      return $this->render('view', [
-        'model' => $model,
-        'addAttachmentsForm' => new AddAttachmentsForm(),
-        'taskCommentForm' => new TaskComments(),
-        'userId' => \Yii::$app->user->id,
-      ]);
-    }
-    return $this->goHome();
-  }
-
-  public function actionCreate()
-  {
-    $model = new Task();
-    $post = Yii::$app->request->post();
-
-    if ($model->load($post) && $model->save()) {
-      return $this->redirect(['view', 'id' => $model->id]);
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::class,
+//                Выбор только конкретных action, если не указывать, то для всех:
+//                'only' => ['one'],
+                'rules' => [
+                    [
+//                        Подтверждение конкретных action:
+//                        'actions' => ['one'],
+//                        true - разрешить доступ, false - запретить доступ:
+                        'allow' => true,
+//                        роли, '@' - для авторизованных пользователей, '?' - для неавторизованных пользователей, гостей:
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+        ];
     }
 
-    $usersList = User::getUserList();
-    $statusList = TaskStatuses::getStatusList();
+    public function actionIndex()
+    {
+        //2. На главной странице сделать возможность фильтровать задачи по месяцам
+        $months = \frontend\models\Task::getMonths();
+        $request = Yii::$app->request;
+        $month = $request->post('months') ?: 'all';
 
-    return $this->render('create', [
-      'model' => $model,
-      'usersList' => $usersList,
-      'statusList' => $statusList,
-    ]);
-  }
+//        "SELECT * FROM task WHERE MONTH(deadline) = {$month}";
 
-  public function actionEdit($id)
-  {
-    $model = $this->findModel($id);
-    $post = Yii::$app->request->post();
+        if($month == 'all') {
+            $dataProvider = new ActiveDataProvider([
+                'query' => Task::find(),
+                'pagination' => [
+                    'pageSize' => 12
+                ],
+            ]);
+        } else {
+            $dataProvider = new ActiveDataProvider([
+                'query' => Task::find()
+                    ->where("MONTH(deadline) = {$month}"),
+                'pagination' => [
+                    'pageSize' => 12,
+                ],
+            ]);
+        }
 
-    if ($post){
-      if ($model->load($post) && $model->save()) {
-        \Yii::$app->session->setFlash('success', "Changes saved");
-        return $this->redirect(['view', 'id' => $model->id]);
-      }
+
+        //Настройки сортировки по умолчанию
+        $dataProvider->sort->attributes['update_time'] = [
+            'asc' => ['update_time' => SORT_ASC],
+            'desc' => ['update_time' => SORT_DESC],
+            //Переименовываем:
+            'label' => 'By update date',
+        ];
+        //Сортировка по умолчанию:
+        $dataProvider->sort->defaultOrder['update_time'] = SORT_ASC;
+
+        //3. На главной странице кэшировать результат выполнения запроса тасков(по месяцам)
+//        \Yii::$app->db->cache(function() use ($dataProvider){
+//            return $dataProvider->prepare();
+//        });
+
+        return $this->render('index', [
+            'dataProvider' => $dataProvider,
+            'months' => $months,
+            'month' => $month,
+        ]);
     }
 
+    public function actionOne($id)
+    {
+        $model = Task::findOne($id);
 
-    $usersList = User::getUserList();
-    $statusList = TaskStatuses::getStatusList();
-
-    return $this->render('edit', [
-      'model' => $model,
-      'usersList' => $usersList,
-      'statusList' => $statusList,
-    ]);
-  }
-
-  public function actionAddAttachment()
-  {
-    $model = new AddAttachmentsForm();
-
-    $model->load(Yii::$app->request->post());
-    $model->attachments = UploadedFile::getInstances($model, 'attachments');
-    if ($model->save()) {
-      \Yii::$app->session->setFlash('success', "File uploaded successfully");
-    } else {
-      \Yii::$app->session->setFlash('success', "File not uploaded");
-    }
-    return $this->redirect(\Yii::$app->request->referrer);
-  }
-
-  public function actionAddComment()
-  {
-    $model = new TaskComments();
-
-    if ($model->load(Yii::$app->request->post()) && $model->save()) {
-      \Yii::$app->session->setFlash('success', "Comment added");
-    } else {
-      \Yii::$app->session->setFlash('success', "Comment not added");
-    }
-    return $this->redirect(\Yii::$app->request->referrer);
-  }
-
-  public function actionDelete($id)
-  {
-    $this->findModel($id)->delete();
-
-    return $this->goHome();
-  }
-
-  public function actionActive()
-  {
-    if (!Yii::$app->user->isGuest) {
-      $id = Yii::$app->user->identity->getId();
-      $dataProvider = new ActiveDataProvider([
-        'query' => Task::find()
-          ->where(['responsible_id' => $id])
-      ]);
-    }
-    return $this->render('active', [
-      'title' => 'Active Tasks',
-      'dataProvider' => $dataProvider
-    ]);
-  }
-
-  protected function findModel($id)
-  {
-    if (($model = Task::findOne($id)) !== null) {
-      return $model;
+        return $this->render('one', [
+            'model' => $model,
+            'usersList' => Users::getUsersList(),
+            'statusesList' => TaskStatuses::getList(),
+            'taskCommentForm' => new TaskComments(),
+            'taskAttachmentForm' => new TaskAttachmentsAddForm(),
+            'userId' => \Yii::$app->user->id, //авторизованный пользователь
+        ]);
     }
 
-    return Null;
-  }
+    public function actionSave($id){
+        if ($model = Task::findOne($id)) {
+            $model->load(Yii::$app->request->post());
+            $model->save();
+            \Yii::$app->session->setFlash('success', "Изменения сохранены");
+        } else {
+            \Yii::$app->session->setFlash('error', "Не удалось сохранить изменения");
+        }
+        $this->redirect(\Yii::$app->request->referrer);
+    }
 
+    public function actionAddComment()
+    {
+        $model = new TaskComments();
+        if ($model->load(\Yii::$app->request->post()) && $model->save()) {
+            \Yii::$app->session->setFlash('success', "Комментарий добавлен!");
+        } else {
+            \Yii::$app->session->setFlash('error', "Не удалось добавить комментарий");
+        }
+        $this->redirect(\Yii::$app->request->referrer);
+    }
+
+    public function actionAddAttachment()
+    {
+        $model = new TaskAttachmentsAddForm();
+        $model->load(\Yii::$app->request->post());
+        $model->attachment = UploadedFile::getInstance($model, 'attachment');
+        if ($model->save()) {
+            \Yii::$app->session->setFlash('success', "Файл добавлен!");
+        } else {
+            \Yii::$app->session->setFlash('error', "Не удалось добавить Файл");
+        }
+        $this->redirect(\Yii::$app->request->referrer);
+    }
 }
